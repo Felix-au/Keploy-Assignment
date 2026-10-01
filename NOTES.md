@@ -58,3 +58,63 @@ Malicious binary reputation.
 
 ### Issue 2: `docker: not found` Inside Keploy Container
 When Keploy attempted to spawn the application container:
+```
+🐰 Keploy: INFO Starting keploy in docker with image {"image:": "ghcr.io/keploy/keploy:v3.6.86"}
+sh: 1: docker: not found
+🐰 Keploy: ERROR failed to run keploy agent in docker {"error": "exit status 127"}
+```
+**Cause**: The official `ghcr.io/keploy/keploy` container image does not bundle the `docker` CLI binary.
+**Fix**: Extracted the static Linux `docker` binary from `docker:cli` into `./docker-bin` and mounted it into `/usr/bin/docker`:
+```powershell
+docker create --name temp-docker-cli docker:cli
+docker cp temp-docker-cli:/usr/local/bin/docker ./docker-bin
+docker rm temp-docker-cli
+# Mount flag: -v "${PWD}/docker-bin:/usr/bin/docker"
+```
+
+### Issue 3: Port 16789 Conflict
+```
+docker: Error response from daemon: driver failed programming external connectivity on endpoint keploy-v3-...:
+Bind for 0.0.0.0:16789 failed: port is already allocated
+```
+**Cause**: Passing `-p 16789:16789` to the outer container conflicted when the internal agent container also attempted to bind `16789` on the host.
+**Fix**: Removed port mapping from the orchestrator container so the agent container can freely bind `16789`.
+
+### Issue 4: Loopback Agent Probe Isolation
+Keploy agent exposes its internal HTTP control plane on an ephemeral port on `127.0.0.1`. If the outer Keploy container runs in bridge network mode, it cannot resolve `127.0.0.1:<port>` of the host.
+**Fix**: Ran the outer Keploy container with `--network host`, enabling direct socket access to the agent probe.
+
+---
+
+## 3. Recording Phase (`keploy record`)
+
+### Final Proven Record Command
+```powershell
+docker run --name keploy-v2 --rm `
+  --network host --privileged --pid=host `
+  -v /var/run/docker.sock:/var/run/docker.sock `
+  -v /sys/fs/cgroup:/sys/fs/cgroup `
+  -v "${PWD}/docker-bin:/usr/bin/docker" `
+  -v "${PWD}:/workspace" `
+  -w /workspace `
+  --entrypoint /app/entrypoint.sh `
+  ghcr.io/keploy/keploy /app/keploy record `
+  -c "docker run -p 8080:8080 --name MongoApp --network keploy-network --rm gin-app:1.0" `
+  --container-name "MongoApp" `
+  -n keploy-network `
+  --build-delay 25
+```
+
+### Recorded API Calls
+
+#### Call 1: Create Short URL (POST `/url`)
+```powershell
+curl.exe -X POST http://localhost:8080/url `
+  -H "Content-Type: application/json" `
+  -d '{\"url\": \"https://keploy.io\"}'
+```
+**Response**:
+```json
+{"ts":1791019009148655413,"url":"http://localhost:8080/7fvpSsFg"}
+```
+Keploy captured test case: `post-url-1`.
