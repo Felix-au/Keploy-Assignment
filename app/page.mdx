@@ -78,3 +78,53 @@ For this tutorial, we will use Keploy's official Go quickstart: a URL shortener 
 
 import (
 	"context"
+	"math/rand"
+	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
+type url struct {
+	Url string \`json:"url"\`
+}
+
+// urlShortner handles POST /url - generates a short key and persists to Mongo
+func urlShortner(c *gin.Context) {
+	var req url
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	shortURL := shortUrlGenerator()
+	collection := client.Database("keploy").Collection("urls")
+
+	_, err := collection.InsertOne(context.Background(), bson.M{
+		"url":       req.Url,
+		"short_url": shortURL,
+		"ts":        time.Now(), // DYNAMIC FIELD: Keploy automatically flags this as noise!
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"url":    "http://localhost:8080/" + shortURL,
+	})
+}`}
+/>
+
+### Key Endpoints
+
+<div className="overflow-x-auto not-prose my-6">
+  <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-xs">
+    <thead className="bg-slate-50 dark:bg-slate-900/80">
+      <tr>
+        <th className="px-4 py-3 text-left font-bold text-slate-700 dark:text-slate-300">Method</th>
+        <th className="px-4 py-3 text-left font-bold text-slate-700 dark:text-slate-300">Path</th>
+        <th className="px-4 py-3 text-left font-bold text-slate-700 dark:text-slate-300">Description</th>
