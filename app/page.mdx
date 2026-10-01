@@ -1,0 +1,80 @@
+import { Callout } from '../components/Callout';
+import { CodeBlock } from '../components/CodeBlock';
+import { Tabs, TabItem } from '../components/Tabs';
+import { Accordion, AccordionItem } from '../components/Accordion';
+import { InteractiveDiagram } from '../components/InteractiveDiagram';
+import { Badge } from '../components/Badge';
+import { Card, Stepper, Step } from '../components/Card';
+
+# Zero-Code eBPF Testing for Go: The Definitive Gin & MongoDB Guide
+
+<div className="flex flex-wrap items-center gap-2 not-prose my-4">
+  <Badge variant="orange" size="md">Go 1.21+</Badge>
+  <Badge variant="purple" size="md">Gin v1.9</Badge>
+  <Badge variant="info" size="md">MongoDB 6.0</Badge>
+  <Badge variant="success" size="md">Keploy v3.6.86</Badge>
+  <Badge variant="default" size="md">eBPF / Linux Kernel 6.x</Badge>
+  <span className="text-xs text-slate-400 ml-2">12 min read</span>
+</div>
+
+<div className="lead text-base sm:text-lg text-slate-700 dark:text-slate-300 font-normal leading-relaxed my-6">
+  Every Go engineer knows the pain of writing integration tests. You either spend hours writing brittle mocks with <code className="text-orange-600 dark:text-orange-400 font-mono">gomock</code> and <code className="text-orange-600 dark:text-orange-400 font-mono">testify</code>, or you maintain a slow, flaky Docker Compose test environment that breaks on every schema change. This guide demonstrates how <strong>Keploy</strong> uses Linux eBPF syscall hooks to passively capture real HTTP traffic, record raw binary MongoDB wire protocols, and replay them with 100% mock isolation, <strong>without touching a single line of your application code</strong>.
+</div>
+
+<Callout type="tip" title="Empirical, Verified Walkthrough">
+  Every single command, log output, YAML artifact, and regression test in this guide was executed and verified on a live environment running <strong>Docker Desktop 29.8</strong> with the <strong>WSL2 Linux 6.18 kernel</strong>. No theoretical mockups: everything here works in real production-like setups.
+</Callout>
+
+---
+
+## 1. The Modern Go Testing Dilemma
+
+Go is celebrated for its simplicity, concurrency model, and lightning-fast compiler. Yet, when it comes to microservice integration testing, Go developers frequently find themselves trapped between two suboptimal paradigms:
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-6">
+  <Card title="The Unit Mocking Trap" icon="⚠️">
+    Writing interfaces for every database repository, external client, and cache, followed by generating thousands of lines of boilerplate with <code>mockgen</code>. When your MongoDB schema or SQL query changes, the mocks stay green while production silently crashes.
+  </Card>
+  <Card title="The Ephemeral DB Fragility" icon="💥">
+    Spinning up ephemeral MongoDB or PostgreSQL instances with <code>dockertest</code> or <code>docker-compose</code>. CI builds slow down by 15 minutes, state leaks between test runs, dynamic timestamps cause assertions to fail, and test databases become a maintenance nightmare.
+  </Card>
+</div>
+
+### Why Keploy is Fundamentally Different
+
+Keploy flips the traditional testing pyramid on its head:
+
+1. **Zero-Code Instrumentation**: You don't import an SDK or decorate your handlers. Your Go binary remains pristine and production-ready.
+2. **eBPF-Powered Kernel Interception**: Keploy attaches probes to Linux kernel socket syscalls (`connect`, `sendto`, `recvfrom`), capturing inbound HTTP requests and outbound network calls at the protocol layer.
+3. **Wire-Level Dependency Mocking**: Instead of mocking Go structs, Keploy records the raw TCP bytes sent between your application and external dependencies (MongoDB, PostgreSQL, Redis, gRPC, HTTP).
+4. **Intelligent Noise Detection**: Keploy automatically recognizes dynamic fields (like timestamps, UUIDs, and JWT expirations) and eliminates false-positive test failures out of the box.
+
+---
+
+## 2. Under the Hood: How Keploy Operates
+
+To understand Keploy's magic, explore the interactive flow below. Toggle between **Record Mode** (when traffic is captured) and **Replay Mode** (when regression tests run offline):
+
+<InteractiveDiagram />
+
+### The Architecture in Detail
+
+When Keploy wraps your application container:
+
+- **Ingress Hooking**: Keploy listens on the inbound port. When a test client or QA tester issues an HTTP request, Keploy logs the exact request parameters (method, URL, headers, and body).
+- **Egress Virtualization**: When the Gin handler initiates a connection to MongoDB on port 27017, Keploy's eBPF driver intercepts the socket descriptor. During **Record Mode**, Keploy allows the packet to reach the real MongoDB server, simultaneously storing the binary request and response frames into `mocks.yaml`.
+- **Offline Mock Serving**: During **Replay Mode**, the test runner fires the captured HTTP request into the application. When the application tries to talk to MongoDB, Keploy short-circuits the connection at the kernel level and serves the matching BSON response straight from `mocks.yaml`. The real MongoDB instance can be completely shut down!
+
+---
+
+## 3. The Sample Application: Gin + MongoDB URL Shortener
+
+For this tutorial, we will use Keploy's official Go quickstart: a URL shortener microservice built with **Gin** and **MongoDB 6.0**.
+
+<CodeBlock
+  lang="go"
+  filename="samples-go/gin-mongo/handler.go"
+  code={`package main
+
+import (
+	"context"
