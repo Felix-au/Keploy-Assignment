@@ -558,3 +558,52 @@ Now, re-run `keploy test`:
   -v /sys/fs/bpf:/sys/fs/bpf \\
   -v /var/run/docker.sock:/var/run/docker.sock \\
   -v "$(pwd)/keploy:/app/keploy" \\
+  -v "$(pwd)/docker-bin:/usr/bin/docker" \\
+  ghcr.io/keploy/keploy:3.6.86 \\
+  keploy test -c "docker run --name ginApp --rm --network keploy-network -p 8080:8080 gin-app:1.0" \\
+  --container-name "ginApp" --delay 10`}
+/>
+
+### The Result: 4/4 Passed Without a Database!
+
+<CodeBlock
+  lang="text"
+  code={`<=========================================>
+  TOTAL TESTS PASSED: 4
+  TOTAL TESTS FAILED: 0
+  TOTAL TIME ELAPSED: 10.18s
+<=========================================>`}
+/>
+
+<Callout type="info" title="Why Did This Work?">
+  When <code>ginApp</code> started up, the Go MongoDB driver called <code>net.Dial("mongoDb:27017")</code>. Keploy's eBPF hook intercepted the connection attempt, matched the socket parameters against <code>mocks.yaml</code>, and replied with the recorded handshake and query BSON payloads!
+  <br /><br />
+  Your microservice believed it was talking to a fully functioning MongoDB cluster. This guarantees that your CI pipeline can run regression test suites in <strong>completely isolated, air-gapped environments</strong> with zero external infrastructure dependencies.
+</Callout>
+
+---
+
+## 10. Advanced Scenario 2: Catching a Real Regression
+
+To prove Keploy's value as a regression shield, let's intentionally introduce a bug into our Go code.
+
+Open `handler.go` and locate line 57 in the `getURL` handler. Change the 404 error message from `"url not found"` to `"link does not exist"`:
+
+<CodeBlock
+  lang="go"
+  filename="samples-go/gin-mongo/handler.go (Regression Mutation)"
+  code={`// Original code:
+// c.JSON(http.StatusNotFound, gin.H{"error": "url not found"})
+
+// Mutated code (breaking change):
+c.JSON(http.StatusNotFound, gin.H{"error": "link does not exist"})`}
+/>
+
+Rebuild the Docker image:
+
+<CodeBlock
+  lang="bash"
+  code={`docker build -t gin-app:1.0 .`}
+/>
+
+Now run `keploy test` again:
