@@ -168,3 +168,43 @@ Before starting, ensure your local development machine satisfies the following r
         <th className="px-4 py-3 text-left font-bold text-slate-700 dark:text-slate-300">Verified Version</th>
         <th className="px-4 py-3 text-left font-bold text-slate-700 dark:text-slate-300">Role in Tutorial</th>
       </tr>
+    </thead>
+    <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-[#0c121e]">
+      <tr>
+        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-slate-100">Docker Engine</td>
+        <td className="px-4 py-3 font-mono text-orange-600 dark:text-orange-400">29.8.0+</td>
+        <td className="px-4 py-3 text-slate-600 dark:text-slate-300">Runs MongoDB, Gin app, and Keploy runner</td>
+      </tr>
+      <tr>
+        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-slate-100">Linux Kernel</td>
+        <td className="px-4 py-3 font-mono text-orange-600 dark:text-orange-400">6.18+ (or WSL2)</td>
+        <td className="px-4 py-3 text-slate-600 dark:text-slate-300">Provides eBPF socket tracing support</td>
+      </tr>
+      <tr>
+        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-slate-100">Git</td>
+        <td className="px-4 py-3 font-mono text-orange-600 dark:text-orange-400">2.40+</td>
+        <td className="px-4 py-3 text-slate-600 dark:text-slate-300">Clones samples-go repository</td>
+      </tr>
+      <tr>
+        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-slate-100">Keploy Container</td>
+        <td className="px-4 py-3 font-mono text-orange-600 dark:text-orange-400">ghcr.io/keploy/keploy:3.6.86</td>
+        <td className="px-4 py-3 text-slate-600 dark:text-slate-300">eBPF record and replay orchestrator</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<Callout type="warning" title="Windows Users: Use Containerized Keploy">
+  While Keploy provides an experimental <code>keploy.exe</code> for Windows, modern Windows 11 SmartScreen and Application Control policies block unsigned binaries. Furthermore, eBPF requires a real Linux kernel. <strong>The gold-standard workflow on Windows is running Keploy as a privileged container inside Docker Desktop WSL2 backend.</strong>
+</Callout>
+
+---
+
+## 5. Step-by-Step Setup: Building the Stack
+
+Let's configure our environment, clone the sample app, and build the Docker image.
+
+<Stepper>
+  <Step number="1" title="Clone the Samples Repository">
+    Clone Keploy's official Go sample repository and navigate to the Gin + Mongo project:
+    <CodeBlock
