@@ -478,3 +478,43 @@ spec:
             document:
               n: 1
               ok: 1.0`}
+/>
+
+Keploy captured the **actual BSON wire protocol** exchange (`OP_MSG` opcode 2013) between the official Go Mongo Driver (`go.mongodb.org/mongo-driver`) and MongoDB. It records query documents, insert operations, sequence IDs, and server responses at the TCP socket layer.
+
+---
+
+## 8. Replay Mode: Running the Test Suite (`keploy test`)
+
+To run regression tests, simply invoke `keploy test`:
+
+<CodeBlock
+  lang="bash"
+  filename="Terminal (Run Keploy Test)"
+  code={`docker run --name keploy-v2 --privileged --pid host \\
+  --net keploy-network \\
+  -v /sys/kernel/debug:/sys/kernel/debug \\
+  -v /sys/fs/bpf:/sys/fs/bpf \\
+  -v /var/run/docker.sock:/var/run/docker.sock \\
+  -v "$(pwd)/keploy:/app/keploy" \\
+  -v "$(pwd)/docker-bin:/usr/bin/docker" \\
+  ghcr.io/keploy/keploy:3.6.86 \\
+  keploy test -c "docker run --name ginApp --rm --network keploy-network -p 8080:8080 gin-app:1.0" \\
+  --container-name "ginApp" --delay 10`}
+/>
+
+### Test Results
+
+Keploy spawns the `ginApp` container, waits for the healthcheck probe, fires each recorded test case in sequence, validates responses against recorded assertions, and produces the test summary:
+
+<CodeBlock
+  lang="text"
+  filename="Keploy Test Output"
+  code={`<=========================================>
+  TOTAL TESTS PASSED: 4
+  TOTAL TESTS FAILED: 0
+  TOTAL TIME ELAPSED: 10.12s
+<=========================================>
+
+Test-set summary:
+  test-set-0:
