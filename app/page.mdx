@@ -288,3 +288,33 @@ keploy 2026-10-01T09:16:33Z INFO	server	Keploy has taken control of the docker c
 [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
 [GIN-debug] POST   /url                      --> main.shortenURL (3 handlers)
 [GIN-debug] GET    /:param                   --> main.redirectURL (3 handlers)
+[GIN-debug] Listening and serving HTTP on :8080`}
+/>
+
+### Issuing Real Test Traffic
+
+With Keploy actively monitoring `ginApp`, execute our test suite using `curl` from a separate terminal.
+
+<Tabs>
+  <TabItem label="1. Create Short URL (Keploy.io)">
+    <CodeBlock
+      lang="bash"
+      code={`curl -X POST http://localhost:8080/url \\
+  -H "Content-Type: application/json" \\
+  -d '{"url":"https://keploy.io"}'`}
+    />
+    <strong>Server Response:</strong>
+    <CodeBlock
+      lang="json"
+      code={`{"status":"success","url":"http://localhost:8080/7fvpSsFg"}`}
+    />
+  </TabItem>
+
+  <TabItem label="2. Create Short URL (GitHub)">
+    <CodeBlock
+      lang="bash"
+      code={`curl -X POST http://localhost:8080/url \\
+  -H "Content-Type: application/json" \\
+  -d '{"url":"https://github.com/keploy/keploy"}'`}
+    />
+    <strong>Server Response:</strong>
