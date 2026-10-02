@@ -353,3 +353,38 @@ Content-Length: 43
       code={`HTTP/1.1 404 Not Found
 Content-Type: application/json; charset=utf-8
 Date: Thu, 01 Oct 2026 10:04:18 GMT
+Content-Length: 25
+
+{"error":"url not found"}`}
+    />
+  </TabItem>
+</Tabs>
+
+### Stopping the Record Session
+
+Press `Ctrl+C` in the Keploy terminal. Keploy shuts down gracefully, flushing all captured HTTP transactions and MongoDB wire packets to disk in `keploy/test-set-0/`.
+
+---
+
+## 7. Inspecting the Generated Artifacts
+
+Let's examine what Keploy saved in the `keploy/test-set-0/` directory:
+
+```text
+keploy/
+└── test-set-0/
+    ├── tests/
+    │   ├── post-url-1.yaml
+    │   ├── post-url-2.yaml
+    │   ├── get-7fvpssfg-1.yaml
+    │   └── get-nonexistent-1.yaml
+    └── mocks.yaml
+```
+
+### Deep Dive: `post-url-1.yaml` (The Inbound Test Case)
+
+<CodeBlock
+  lang="yaml"
+  filename="keploy/test-set-0/tests/post-url-1.yaml"
+  code={`version: api.keploy.io/v1beta1
+kind: Http
