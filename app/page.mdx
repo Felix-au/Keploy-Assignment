@@ -208,3 +208,43 @@ Let's configure our environment, clone the sample app, and build the Docker imag
   <Step number="1" title="Clone the Samples Repository">
     Clone Keploy's official Go sample repository and navigate to the Gin + Mongo project:
     <CodeBlock
+      lang="bash"
+      code={`git clone https://github.com/keploy/samples-go.git
+cd samples-go/gin-mongo`}
+    />
+  </Step>
+
+  <Step number="2" title="Create an Isolated Docker Bridge Network">
+    Containers must communicate via DNS names (e.g. <code>mongoDb:27017</code>). Create a custom bridge network:
+    <CodeBlock
+      lang="bash"
+      code={`docker network create keploy-network`}
+    />
+  </Step>
+
+  <Step number="3" title="Start MongoDB Instance">
+    Launch MongoDB 6.0 attached to <code>keploy-network</code>:
+    <CodeBlock
+      lang="bash"
+      code={`docker run -d --name mongoDb --network keploy-network -p 27017:27017 mongo:6.0`}
+    />
+  </Step>
+
+  <Step number="4" title="Build the Gin Application Docker Image">
+    Build the Go application image. The Dockerfile compiles the Go binary using <code>golang:1.21-alpine</code> and packages it into a minimal Alpine runner:
+    <CodeBlock
+      lang="bash"
+      code={`docker build -t gin-app:1.0 .`}
+    />
+  </Step>
+</Stepper>
+
+---
+
+## 6. Recording Live API Calls with Keploy
+
+Now comes the fun part: recording real test cases without writing code.
+
+### Launching Keploy in Record Mode
+
+Execute the command below to start Keploy in `record` mode. Notice the flags:
