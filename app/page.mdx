@@ -518,3 +518,43 @@ Keploy spawns the `ginApp` container, waits for the healthcheck probe, fires eac
 
 Test-set summary:
   test-set-0:
+    post-url-1: PASSED (time: 42ms)
+    post-url-2: PASSED (time: 38ms)
+    get-7fvpssfg-1: PASSED (time: 29ms)
+    get-nonexistent-1: PASSED (time: 25ms)`}
+/>
+
+All 4 test cases passed in 10.12 seconds with **zero hand-written test code**.
+
+---
+
+## 9. Advanced Scenario 1: Zero-Database Replay
+
+A common objection to integration tests is: *"What happens if MongoDB is down or unavailable in CI?"*
+
+Let's test Keploy's network virtualization by **completely shutting down MongoDB**:
+
+<CodeBlock
+  lang="bash"
+  code={`docker stop mongoDb`}
+/>
+
+Verify that MongoDB is terminated:
+
+<CodeBlock
+  lang="bash"
+  code={`docker ps --filter "name=mongoDb"
+# Output is empty - MongoDB is 100% stopped!`}
+/>
+
+Now, re-run `keploy test`:
+
+<CodeBlock
+  lang="bash"
+  filename="Terminal (Running with MongoDB Offline)"
+  code={`docker run --name keploy-v2 --privileged --pid host \\
+  --net keploy-network \\
+  -v /sys/kernel/debug:/sys/kernel/debug \\
+  -v /sys/fs/bpf:/sys/fs/bpf \\
+  -v /var/run/docker.sock:/var/run/docker.sock \\
+  -v "$(pwd)/keploy:/app/keploy" \\
