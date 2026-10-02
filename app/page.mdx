@@ -388,3 +388,48 @@ keploy/
   filename="keploy/test-set-0/tests/post-url-1.yaml"
   code={`version: api.keploy.io/v1beta1
 kind: Http
+name: post-url-1
+status: RUNNING
+spec:
+  metadata: {}
+  req:
+    method: POST
+    proto_major: 1
+    proto_minor: 1
+    url: /url
+    url_params: {}
+    header:
+      Accept: "*/*"
+      Content-Length: "27"
+      Content-Type: application/json
+      User-Agent: curl/8.12.1
+    body: '{"url":"https://keploy.io"}'
+    timestamp: 2026-10-01T10:04:02.109Z
+  resp:
+    status_code: 200
+    header:
+      Content-Length: "60"
+      Content-Type: application/json; charset=utf-8
+      Date: Thu, 01 Oct 2026 10:04:02 GMT
+    body: '{"status":"success","url":"http://localhost:8080/7fvpSsFg"}'
+    status_message: OK
+    proto_major: 0
+    proto_minor: 0
+    timestamp: 2026-10-01T10:04:02.115Z
+  objects: []
+  assertions:
+    noise:
+      header.Date: []
+      body.ts: []
+  created: 1759485842`}
+/>
+
+<Callout type="success" title="The 'A-Ha' Moment: Automatic Noise Isolation">
+  Look closely at lines 31-34 in <code>post-url-1.yaml</code>:
+  <pre className="text-xs font-mono my-1 bg-slate-900 text-slate-100 p-2 rounded">
+assertions:
+  noise:
+    header.Date: []
+    body.ts: []
+  </pre>
+  In Go, our handler inserted <code>"ts": time.Now()</code> into MongoDB and Gin generated an HTTP <code>Date</code> header. In traditional snapshot testing, every subsequent test run would <strong>fail</strong> because the timestamp changes every second!
