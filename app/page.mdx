@@ -658,3 +658,52 @@ docker run --rm --entrypoint cat docker:cli /usr/local/bin/docker &gt; ./docker-
 chmod +x ./docker-bin/docker
 # Add mount to Keploy container:
 -v "$(pwd)/docker-bin:/usr/bin/docker"
+    </pre>
+  </AccordionItem>
+
+  <AccordionItem title="Port 16789 Bind Conflict (Port Already Allocated)" badge="Networking">
+    <strong>The Problem:</strong> Passing <code>-p 16789:16789</code> to the outer Keploy container while Keploy internally launches an inner agent that attempts to bind port 16789 results in a Docker port collision.
+    <br /><br />
+    <strong>The Fix:</strong> Do not map port 16789 on the outer Keploy runner container when using Docker-in-Docker socket mounting. Let the Keploy agent bind the port on the host or shared bridge network.
+  </AccordionItem>
+
+  <AccordionItem title="Agent Probe Loopback Isolation (127.0.0.1 Dial Failure)" badge="Probes">
+    <strong>The Problem:</strong> The Keploy agent probe binds an HTTP healthcheck on <code>127.0.0.1:&lt;ephemeral-port&gt;</code>. If the outer container uses standard isolated bridge networking, it cannot ping the agent probe on the host loopback.
+    <br /><br />
+    <strong>The Fix:</strong> Launch the outer container with <code>--network host</code> or <code>--pid host</code> so that the host network namespace is shared seamlessly.
+  </AccordionItem>
+
+  <AccordionItem title="Windows SmartScreen / Antivirus Blocking Native Executable" badge="Windows 11">
+    <strong>The Problem:</strong> Downloading <code>enterprise_windows_amd64.exe</code> directly triggers Windows SmartScreen warnings or organizational application whitelisting policies.
+    <br /><br />
+    <strong>The Fix:</strong> Run Keploy via Docker Desktop using WSL2 backend. Since eBPF requires a Linux kernel, running inside Docker WSL2 provides 100% native kernel feature parity while bypassing Windows host restrictions.
+  </AccordionItem>
+</Accordion>
+
+---
+
+## 12. CI/CD Integration: GitHub Actions
+
+Automating Keploy in CI takes less than 30 lines of YAML. Here is a production-ready GitHub Actions workflow that executes your regression test suite on every pull request:
+
+<CodeBlock
+  lang="yaml"
+  filename=".github/workflows/keploy-test.yml"
+  code={`name: Keploy Regression Suite
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  keploy-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
