@@ -318,3 +318,38 @@ With Keploy actively monitoring `ginApp`, execute our test suite using `curl` fr
   -d '{"url":"https://github.com/keploy/keploy"}'`}
     />
     <strong>Server Response:</strong>
+    <CodeBlock
+      lang="json"
+      code={`{"status":"success","url":"http://localhost:8080/ToiV1xMV"}`}
+    />
+  </TabItem>
+
+  <TabItem label="3. Follow Redirect (303)">
+    <CodeBlock
+      lang="bash"
+      code={`curl -i http://localhost:8080/7fvpSsFg`}
+    />
+    <strong>Server Response:</strong>
+    <CodeBlock
+      lang="http"
+      code={`HTTP/1.1 303 See Other
+Content-Type: text/html; charset=utf-8
+Location: https://keploy.io
+Date: Thu, 01 Oct 2026 10:04:12 GMT
+Content-Length: 43
+
+<a href="https://keploy.io">See Other</a>.`}
+    />
+  </TabItem>
+
+  <TabItem label="4. Test 404 (Not Found)">
+    <CodeBlock
+      lang="bash"
+      code={`curl -i http://localhost:8080/nonexistent`}
+    />
+    <strong>Server Response:</strong>
+    <CodeBlock
+      lang="http"
+      code={`HTTP/1.1 404 Not Found
+Content-Type: application/json; charset=utf-8
+Date: Thu, 01 Oct 2026 10:04:18 GMT
