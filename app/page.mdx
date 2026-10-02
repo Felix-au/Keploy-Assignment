@@ -248,3 +248,43 @@ Now comes the fun part: recording real test cases without writing code.
 ### Launching Keploy in Record Mode
 
 Execute the command below to start Keploy in `record` mode. Notice the flags:
+- `--privileged` and `/sys/kernel/debug` are required for eBPF kernel probes.
+- `-v /var/run/docker.sock:/var/run/docker.sock` allows Keploy to monitor container lifecycle.
+- `--container-name "ginApp"` tells Keploy which container to intercept.
+
+<CodeBlock
+  lang="bash"
+  filename="Terminal (Run Keploy Record)"
+  code={`docker run --name keploy-v2 -p 16789:16789 --privileged --pid host \\
+  --net keploy-network \\
+  -v /sys/kernel/debug:/sys/kernel/debug \\
+  -v /sys/fs/bpf:/sys/fs/bpf \\
+  -v /var/run/docker.sock:/var/run/docker.sock \\
+  -v "$(pwd)/keploy:/app/keploy" \\
+  -v "$(pwd)/docker-bin:/usr/bin/docker" \\
+  ghcr.io/keploy/keploy:3.6.86 \\
+  keploy record -c "docker run --name ginApp --rm --network keploy-network -p 8080:8080 gin-app:1.0" \\
+  --container-name "ginApp"`}
+/>
+
+Once initialized, Keploy outputs its startup banner:
+
+<CodeBlock
+  lang="text"
+  filename="Keploy Startup Log"
+  code={`  _  ________ _____  _      ______     __
+ | |/ /  ____|  __ \\| |    / __ \\ \\   / /
+ | ' /| |__  | |__) | |   | |  | \\ \\_/ / 
+ |  < |  __| |  ___/| |   | |  | |\\   /  
+ | . \\| |____| |    | |___| |__| | | |   
+ |_|\\_\\______|_|    |______\\____/  |_|   
+
+version: 3.6.86
+keploy 2026-10-01T09:16:30Z INFO	proxy	[Docker Client]: Starting docker container {"container": "ginApp"}
+keploy 2026-10-01T09:16:32Z INFO	proxy	[Docker Client]: Container started successfully {"container": "ginApp", "id": "8125e3509e..."}
+keploy 2026-10-01T09:16:33Z INFO	ebpf	[eBPF Hooks]: Kernel socket syscall interception active (connect, sendto, recvfrom)
+keploy 2026-10-01T09:16:33Z INFO	server	Keploy has taken control of the docker container: ginApp
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+[GIN-debug] POST   /url                      --> main.shortenURL (3 handlers)
+[GIN-debug] GET    /:param                   --> main.redirectURL (3 handlers)
