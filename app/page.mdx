@@ -433,3 +433,48 @@ assertions:
     body.ts: []
   </pre>
   In Go, our handler inserted <code>"ts": time.Now()</code> into MongoDB and Gin generated an HTTP <code>Date</code> header. In traditional snapshot testing, every subsequent test run would <strong>fail</strong> because the timestamp changes every second!
+  <br /><br />
+  Keploy's intelligent differential engine analyzed the payload and automatically designated <code>header.Date</code> and <code>body.ts</code> as <strong>noise</strong>. During replay, it asserts the schema and exact static fields (e.g. <code>status: "success"</code>) while ignoring volatile timestamp differences!
+</Callout>
+
+### Deep Dive: `mocks.yaml` (The Binary Wire Protocol)
+
+Now inspect `mocks.yaml`. Notice how Keploy did not require you to write a mock struct:
+
+<CodeBlock
+  lang="yaml"
+  filename="keploy/test-set-0/mocks.yaml (Excerpt)"
+  code={`version: api.keploy.io/v1beta1
+kind: Mongo
+name: mock-0
+spec:
+  metadata:
+    operation: insert
+  requests:
+    - header:
+        length: 124
+        request_id: 2
+        response_to: 0
+        opcode: 2013 # OP_MSG Mongo wire opcode
+      message:
+        flags: 0
+        sections:
+          - kind: 0
+            document:
+              insert: urls
+              ordered: true
+              lsid: { id: "a6b7c8d9-..." }
+              $db: keploy
+  responses:
+    - header:
+        length: 45
+        request_id: 15
+        response_to: 2
+        opcode: 2013
+      message:
+        flags: 0
+        sections:
+          - kind: 0
+            document:
+              n: 1
+              ok: 1.0`}
