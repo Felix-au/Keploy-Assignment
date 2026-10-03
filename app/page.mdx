@@ -707,3 +707,49 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
+      - name: Create Keploy Network
+        run: docker network create keploy-network
+
+      - name: Build Application Image
+        run: docker build -t gin-app:1.0 ./samples-go/gin-mongo
+
+      - name: Run Keploy Test Runner
+        run: |
+          docker run --privileged --pid host \\
+            --net keploy-network \\
+            -v /sys/kernel/debug:/sys/kernel/debug \\
+            -v /sys/fs/bpf:/sys/fs/bpf \\
+            -v /var/run/docker.sock:/var/run/docker.sock \\
+            -v "\${{ github.workspace }}/samples-go/gin-mongo/keploy:/app/keploy" \\
+            ghcr.io/keploy/keploy:3.6.86 \\
+            keploy test -c "docker run --name ginApp --rm --network keploy-network -p 8080:8080 gin-app:1.0" \\
+            --container-name "ginApp" --delay 10`}
+/>
+
+Because Keploy replaces your live database with `mocks.yaml`, your CI job runs in **seconds**, consumes minimal compute, and never fails due to network hiccups.
+
+---
+
+## 13. Summary & Comparison
+
+Let's review how Keploy stacks up against traditional Go testing methodologies:
+
+<div className="overflow-x-auto not-prose my-6">
+  <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-xs">
+    <thead className="bg-slate-50 dark:bg-slate-900/80">
+      <tr>
+        <th className="px-4 py-3 text-left font-bold text-slate-700 dark:text-slate-300">Feature</th>
+        <th className="px-4 py-3 text-left font-bold text-slate-700 dark:text-slate-300">Gomock / Testify</th>
+        <th className="px-4 py-3 text-left font-bold text-slate-700 dark:text-slate-300">Dockertest / Compose</th>
+        <th className="px-4 py-3 text-left font-bold text-slate-700 dark:text-slate-300">Keploy (eBPF)</th>
+      </tr>
+    </thead>
+    <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-[#0c121e]">
+      <tr>
+        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-slate-100">Code Changes Required</td>
+        <td className="px-4 py-3 text-rose-500 font-medium">Heavy (Interfaces + Mocks)</td>
+        <td className="px-4 py-3 text-amber-500 font-medium">Moderate (Fixture setups)</td>
+        <td className="px-4 py-3 text-emerald-500 font-bold">Zero (Unmodified binary)</td>
+      </tr>
+      <tr>
