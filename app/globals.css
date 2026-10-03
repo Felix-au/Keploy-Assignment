@@ -28,11 +28,11 @@ html:not(.dark) {
 .dark,
 [data-theme="dark"],
 html.dark {
-  --bg-primary: #090d16;
-  --bg-secondary: #0f1523;
-  --bg-tertiary: #161e31;
-  --border-subtle: #1e293b;
-  --border-strong: #334155;
+  --bg-primary: #0b0d11;
+  --bg-secondary: #11141a;
+  --bg-tertiary: #171b23;
+  --border-subtle: #21262d;
+  --border-strong: #30363d;
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
@@ -40,9 +40,9 @@ html.dark {
   --accent-hover: #ff7324;
   --accent-subtle: rgba(255, 138, 67, 0.12);
   --accent-border: rgba(255, 138, 67, 0.3);
-  --code-bg: #0b0f19;
-  --card-bg: #0f1523;
-  --card-border: #1e293b;
+  --code-bg: #0e1117;
+  --card-bg: #11141a;
+  --card-border: #21262d;
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.45), 0 4px 6px -4px rgb(0 0 0 / 0.3);

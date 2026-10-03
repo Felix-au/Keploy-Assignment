@@ -11,7 +11,7 @@ interface CardProps {
 export function Card({ title, subtitle, icon, children, className = '' }: CardProps) {
   return (
     <div
-      className={`my-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c121e] p-5 shadow-xs transition-all hover:border-slate-300 dark:hover:border-slate-700 ${className}`}
+      className={`my-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#11141a] p-5 shadow-xs transition-all hover:border-slate-300 dark:hover:border-slate-700 ${className}`}
     >
       {(title || icon) && (
         <div className="mb-3 flex items-start gap-3">

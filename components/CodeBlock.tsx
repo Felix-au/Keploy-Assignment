@@ -42,7 +42,7 @@ export async function CodeBlock({
   );
 
   return (
-    <div className="group relative my-5 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-[#f8fafc] dark:bg-[#0b0f19] shadow-sm transition-all">
+    <div className="group relative my-5 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-[#f8fafc] dark:bg-[#0e1117] shadow-sm transition-all">
       {/* Header bar */}
       <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800/80 bg-slate-100/80 dark:bg-slate-900/80 px-4 py-2 text-xs">
         <div className="flex items-center gap-2 font-mono text-slate-600 dark:text-slate-400">

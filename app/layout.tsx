@@ -48,7 +48,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-white dark:bg-[#090d16] text-slate-900 dark:text-slate-100 min-h-screen antialiased selection:bg-orange-500/20 selection:text-orange-600 dark:selection:text-orange-400 transition-colors duration-200">
+      <body className="bg-white dark:bg-[#0b0d11] text-slate-900 dark:text-slate-100 min-h-screen antialiased selection:bg-orange-500/20 selection:text-orange-600 dark:selection:text-orange-400 transition-colors duration-200">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange={false}>
           <ProgressBar />
           <Navbar />

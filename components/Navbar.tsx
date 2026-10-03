@@ -52,7 +52,7 @@ export function Navbar({ githubUrl = 'https://github.com/Felix-au/Keploy-Assignm
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-white/85 dark:bg-[#090d16]/85 backdrop-blur-md transition-colors">
+    <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-white/85 dark:bg-[#0b0d11]/85 backdrop-blur-md transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Brand */}
         <div className="flex items-center gap-3">
@@ -119,7 +119,7 @@ export function Navbar({ githubUrl = 'https://github.com/Felix-au/Keploy-Assignm
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#090d16] px-4 pt-3 pb-6 shadow-xl animate-in slide-in-from-top-2 duration-150">
+        <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0d11] px-4 pt-3 pb-6 shadow-xl animate-in slide-in-from-top-2 duration-150">
           <nav className="grid grid-cols-2 gap-2 text-sm">
             {navLinks.map((link) => (
               <a

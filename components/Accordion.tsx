@@ -57,7 +57,7 @@ interface AccordionProps {
 
 export function Accordion({ children, title }: AccordionProps) {
   return (
-    <div className="my-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c121e] p-4 shadow-sm">
+    <div className="my-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#11141a] p-4 shadow-sm">
       {title && (
         <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
           {title}

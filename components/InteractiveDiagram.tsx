@@ -91,7 +91,7 @@ export function InteractiveDiagram() {
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="my-8 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-linear-to-b from-white to-slate-50 dark:from-[#0b0f19] dark:to-[#080c14] shadow-md"
+      className="my-8 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-linear-to-b from-white to-slate-50 dark:from-[#11141a] dark:to-[#0b0d11] shadow-md"
     >
       {/* Mode Selector Header */}
       <div className="flex flex-wrap items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-900/60 p-4">
