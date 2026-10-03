@@ -70,7 +70,7 @@ keploy-tutorial/
 
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/<repo-name>.git
+git clone https://github.com/Felix-au/Keploy-Assignment.git
 cd keploy-tutorial
 
 # Install dependencies
